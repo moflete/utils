@@ -26,6 +26,12 @@ add_subdirectory(src)
         f.write('''# Include module directories
 add_subdirectory(module1)
 add_subdirectory(module2)
+
+set(MAIN-SOURCES main.c)
+                
+add_executable({} ${MAIN-SOURCES})
+
+target_link_libraries({} PRIVATE module1 module2)
 ''')
 
     with open(os.path.join(project_dir, 'src/module1/CMakeLists.txt'), 'w') as f:
@@ -59,7 +65,16 @@ target_include_directories(module2 PUBLIC
         f.write('// common.h content')
 
     with open(os.path.join(project_dir, 'src/main.c'), 'w') as f:
-        f.write('// main.c content')
+        f.write('''#include <stdio.h>
+                
+#include "project.h"
+#include "common.h"
+
+int main(void) {
+    printf("Hello, world!\\n");
+    return 0;
+}''')
+
 
     with open(os.path.join(project_dir, 'test/CMakeLists.txt'), 'w') as f:
         f.write('''# Set the source files for tests
@@ -113,6 +128,7 @@ class MyProjectConan(ConanFile):
 
     def requirements(self):
         self.requires("unity/2.6.0")
+        self.requires("log.c/cci.20200620")
 
     def layout(self):
         cmake_layout(self)
